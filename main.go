@@ -55,6 +55,6 @@ func main() {
 		log.Fatalf("Unable to parse client secret file to config: %v", err)
 	}
 
-	http.HandleFunc("/", handler)
+	http.HandleFunc("/auth", handler)
 	http.ListenAndServe(":8080", nil)
 }
