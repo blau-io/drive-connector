@@ -61,7 +61,7 @@ func index(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	file, err := getFileByPath(srv, path.Join("/blau.io/configurations/"+
+	file, err := getFileByPath(srv, path.Join("/blau.io/configuration/"+
 		r.URL.Path))
 	if err != nil {
 		log.Printf("Unable to retrieve files: %v", err)
