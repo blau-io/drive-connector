@@ -61,7 +61,8 @@ func index(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	file, err := getFileByPath(srv, path.Join("/blau.io/admin/"+r.URL.Path))
+	file, err := getFileByPath(srv, path.Join("/blau.io/configurations/"+
+		r.URL.Path))
 	if err != nil {
 		log.Printf("Unable to retrieve files: %v", err)
 		http.Error(w, "Unable to retrieve files", http.StatusUnauthorized)
