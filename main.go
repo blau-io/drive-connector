@@ -19,6 +19,7 @@ var (
 	config      *oauth2.Config
 	globalFlags struct {
 		ClientSecretFile string
+		Port             string
 	}
 )
 
@@ -81,6 +82,7 @@ func index(w http.ResponseWriter, r *http.Request) {
 func init() {
 	flag.StringVar(&globalFlags.ClientSecretFile, "secretFile",
 		"client_secret.json", "Path to the Google Drive client secret file")
+	flag.StringVar(&globalFlags.Port, "port", "80", "The Port to listen on")
 	flag.Parse()
 }
 
@@ -95,7 +97,9 @@ func main() {
 		log.Fatalf("Unable to parse client secret file to config: %v", err)
 	}
 
+	log.Println("Listening on port " + globalFlags.Port)
+
 	http.HandleFunc("/", index)
 	http.HandleFunc("/auth", auth)
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":"+globalFlags.Port, nil)
 }
