@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
@@ -8,8 +9,8 @@ import (
 	"log"
 	"net/http"
 	"path"
+	"strings"
 
-	"golang.org/x/net/context"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/drive/v2"
@@ -43,25 +44,14 @@ func auth(w http.ResponseWriter, r *http.Request) {
 }
 
 func index(w http.ResponseWriter, r *http.Request) {
-	cookie, err := r.Cookie("token")
-	if err != nil {
-		log.Printf("Unable to read cookie: %v", err)
-		http.Error(w, "Unable to read cookie", http.StatusUnauthorized)
-		return
-	}
-
-	token := &oauth2.Token{
-		AccessToken: cookie.Value,
-	}
-
-	srv, err := drive.New(config.Client(context.Background(), token))
+	srv, err := getClient(r)
 	if err != nil {
 		log.Printf("Unable to retrieve drive Client: %v", err)
 		http.Error(w, "Unable to parse token", http.StatusUnauthorized)
 		return
 	}
 
-	file, err := getFileByPath(srv, path.Join("/blau.io/configuration/"+
+	file, err := getFileByPath(srv, path.Join("/blau.io/configuration/",
 		r.URL.Path))
 	if err != nil {
 		log.Printf("Unable to retrieve files: %v", err)
@@ -87,6 +77,38 @@ func init() {
 	flag.Parse()
 }
 
+func list(w http.ResponseWriter, r *http.Request) {
+	srv, err := getClient(r)
+	if err != nil {
+		log.Printf("Unable to retrieve drive Client: %v", err)
+		http.Error(w, "Unable to parse token", http.StatusUnauthorized)
+		return
+	}
+
+	url := strings.TrimPrefix(r.URL.Path, "/list")
+	list, err := getDirectoryList(srv, path.Join("/blau.io/content/", url))
+	if err != nil {
+		log.Printf("Unable to get list of directory: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	jsonResponse := make([]string, len(list))
+	for i, v := range list {
+		jsonResponse[i] = v.Title
+	}
+
+	j, err := json.Marshal(jsonResponse)
+	if err != nil {
+		log.Printf("Error while encoding JSON: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	fmt.Fprint(w, string(j))
+}
+
 func main() {
 	secret, err := ioutil.ReadFile(globalFlags.ClientSecretFile)
 	if err != nil {
@@ -102,5 +124,6 @@ func main() {
 
 	http.HandleFunc("/", index)
 	http.HandleFunc("/auth", auth)
+	http.HandleFunc("/list/", list)
 	http.ListenAndServe(":"+globalFlags.Port, nil)
 }
