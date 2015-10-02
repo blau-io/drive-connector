@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/julienschmidt/httprouter"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/drive/v2"
@@ -37,10 +38,12 @@ func main() {
 		log.Fatalf("Unable to parse client secret file to config: %v", err)
 	}
 
-	log.Println("Listening on port " + globalFlags.Port)
+	router := httprouter.New()
+	router.GET("/auth/new", NewUser)
+	router.GET("/browse/:folderid", Browse)
+	router.GET("/read/*filepath", Read)
+	router.POST("/auth/validate", Validate)
 
-	http.HandleFunc("/", index)
-	http.HandleFunc("/auth", auth)
-	http.HandleFunc("/list/", list)
-	http.ListenAndServe(":"+globalFlags.Port, nil)
+	log.Println("Listening on port " + globalFlags.Port)
+	http.ListenAndServe(":"+globalFlags.Port, router)
 }
