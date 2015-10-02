@@ -6,10 +6,44 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/julienschmidt/httprouter"
 	"golang.org/x/oauth2"
+	"google.golang.org/api/drive/v2"
 )
+
+func Add(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	srv, err := getClient(r)
+	if err != nil {
+		log.Printf("Unable to retrieve drive Client: %v", err)
+		http.Error(w, "Unable to parse token", http.StatusUnauthorized)
+		return
+	}
+
+	parent, err := getParent(srv, ps.ByName("filepath"))
+	if err != nil {
+		log.Printf("Unable to get parent id: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	paths := strings.Split(strings.TrimPrefix(ps.ByName("filepath"), "/"), "/")
+
+	file := &drive.File{
+		Title:   paths[len(paths)-1],
+		Parents: []*drive.ParentReference{parent},
+	}
+
+	_, err = srv.Files.Insert(file).Media(r.Body).Do()
+	if err != nil {
+		log.Printf("Error while uploading file: %v", err)
+		http.Error(w, "Error while uploading file",
+			http.StatusInternalServerError)
+	}
+
+	r.Body.Close()
+}
 
 func Browse(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	srv, err := getClient(r)
@@ -19,7 +53,7 @@ func Browse(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
-	list, err := getDirectoryList(srv, ps.ByName("folderid"))
+	list, err := getDirectoryList(srv, ps.ByName("filepath"))
 	if err != nil {
 		log.Printf("Unable to get list of directory: %v", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)

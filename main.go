@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/julienschmidt/httprouter"
 	"golang.org/x/oauth2"
@@ -40,10 +41,11 @@ func main() {
 
 	router := httprouter.New()
 	router.GET("/auth/new", NewUser)
-	router.GET("/browse/:folderid", Browse)
+	router.GET("/browse/*filepath", Browse)
 	router.GET("/read/*filepath", Read)
 	router.POST("/auth/validate", Validate)
+	router.PUT("/add/*filepath", Add)
 
-	log.Println("Listening on port " + string(globalFlags.Port))
-	http.ListenAndServe(":"+string(globalFlags.Port), router)
+	log.Println("Listening on port " + strconv.Itoa(globalFlags.Port))
+	http.ListenAndServe(":"+strconv.Itoa(globalFlags.Port), router)
 }
