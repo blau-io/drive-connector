@@ -6,7 +6,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"path"
 
 	"github.com/julienschmidt/httprouter"
 	"golang.org/x/oauth2"
@@ -20,8 +19,7 @@ func Browse(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
-	list, err := getDirectoryList(srv, path.Join("/blau.io/content/",
-		ps.ByName("folderid")))
+	list, err := getDirectoryList(srv, ps.ByName("folderid"))
 	if err != nil {
 		log.Printf("Unable to get list of directory: %v", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -58,8 +56,7 @@ func Read(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
-	file, err := getFileByPath(srv, path.Join("/blau.io/configuration/",
-		ps.ByName("filepath")))
+	file, err := getFileByPath(srv, ps.ByName("filepath"))
 	if err != nil {
 		log.Printf("Unable to retrieve files: %v", err)
 		http.Error(w, "Unable to retrieve files", http.StatusUnauthorized)
