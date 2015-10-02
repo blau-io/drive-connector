@@ -16,14 +16,14 @@ var (
 	config      *oauth2.Config
 	globalFlags struct {
 		ClientSecretFile string
-		Port             string
+		Port             int
 	}
 )
 
 func init() {
 	flag.StringVar(&globalFlags.ClientSecretFile, "secretFile",
 		"client_secret.json", "Path to the Google Drive client secret file")
-	flag.StringVar(&globalFlags.Port, "port", "80", "The Port to listen on")
+	flag.IntVar(&globalFlags.Port, "port", 80, "The Port to listen on")
 	flag.Parse()
 }
 
@@ -44,6 +44,6 @@ func main() {
 	router.GET("/read/*filepath", Read)
 	router.POST("/auth/validate", Validate)
 
-	log.Println("Listening on port " + globalFlags.Port)
-	http.ListenAndServe(":"+globalFlags.Port, router)
+	log.Println("Listening on port " + string(globalFlags.Port))
+	http.ListenAndServe(":"+string(globalFlags.Port), router)
 }
