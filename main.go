@@ -40,11 +40,12 @@ func main() {
 	}
 
 	router := httprouter.New()
+	router.DELETE("/delete/*filepath", Delete)
 	router.GET("/auth/new", NewUser)
 	router.GET("/browse/*filepath", Browse)
 	router.GET("/read/*filepath", Read)
 	router.POST("/auth/validate", Validate)
-	router.PUT("/add/*filepath", Add)
+	router.POST("/add/*filepath", Add)
 
 	log.Println("Listening on port " + strconv.Itoa(globalFlags.Port))
 	http.ListenAndServe(":"+strconv.Itoa(globalFlags.Port), router)

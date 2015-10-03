@@ -35,6 +35,10 @@ func Add(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		Parents: []*drive.ParentReference{parent},
 	}
 
+	if r.Header.Get("folder") == "true" {
+		file.MimeType = "application/vnd.google-apps.folder"
+	}
+
 	_, err = srv.Files.Insert(file).Media(r.Body).Do()
 	if err != nil {
 		log.Printf("Error while uploading file: %v", err)
@@ -75,6 +79,29 @@ func Browse(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprint(w, string(j))
+}
+
+func Delete(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	srv, err := getClient(r)
+	if err != nil {
+		log.Printf("Unable to retrieve drive Client: %v", err)
+		http.Error(w, "Unable to parse token", http.StatusUnauthorized)
+		return
+	}
+
+	file, err := getFileByPath(srv, ps.ByName("filepath"))
+	if err != nil {
+		log.Printf("Unable to retrieve files: %v", err)
+		http.Error(w, "Unable to retrieve files", http.StatusUnauthorized)
+		return
+	}
+
+	err = srv.Files.Delete(file.Id).Do()
+	if err != nil {
+		log.Printf("Failed to get file: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
 }
 
 func NewUser(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {

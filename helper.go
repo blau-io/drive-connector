@@ -82,7 +82,7 @@ func getFileByPath(srv *drive.Service, path string) (*drive.File, error) {
 
 func getParent(srv *drive.Service, path string) (*drive.ParentReference, error) {
 	paths := strings.Split(strings.TrimPrefix(path, "/"), "/")
-	if len(path) <= 1 {
+	if len(paths) <= 1 {
 		return &drive.ParentReference{Id: "root"}, nil
 	}
 
