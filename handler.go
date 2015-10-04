@@ -109,6 +109,44 @@ func NewUser(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 }
 
+func Publish(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	srv, err := getClient(r)
+	if err != nil {
+		log.Printf("Unable to retrieve drive Client: %v", err)
+		http.Error(w, "Unable to parse token", http.StatusUnauthorized)
+		return
+	}
+
+	file, err := getFileByPath(srv, ps.ByName("filepath"))
+	if err != nil {
+		log.Printf("Unable to retrieve files: %v", err)
+		http.Error(w, "Unable to retrieve files", http.StatusNotFound)
+		return
+	}
+
+	permission := &drive.Permission{
+		Value: "",
+		Type:  "anyone",
+		Role:  "reader",
+	}
+
+	_, err = drive.NewPermissionsService(srv).Insert(file.Id, permission).Do()
+	if err != nil {
+		log.Printf("Unable to insert new permission: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	updated, err := srv.Files.Get(file.Id).Do()
+	if err != nil {
+		log.Printf("Unable to retrieve files: %v", err)
+		http.Error(w, "Unable to retrieve files", http.StatusNotFound)
+		return
+	}
+
+	fmt.Fprint(w, updated.WebViewLink)
+}
+
 func Read(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	srv, err := getClient(r)
 	if err != nil {
