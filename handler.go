@@ -158,7 +158,7 @@ func Read(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	file, err := getFileByPath(srv, ps.ByName("filepath"))
 	if err != nil {
 		log.Printf("Unable to retrieve files: %v", err)
-		http.Error(w, "Unable to retrieve files", http.StatusUnauthorized)
+		http.Error(w, "Unable to retrieve files", http.StatusNotFound)
 		return
 	}
 
