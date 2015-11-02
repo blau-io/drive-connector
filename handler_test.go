@@ -13,9 +13,9 @@ import (
 func TestAdd(t *testing.T) {
 }
 
-func TestAuthUrl(t *testing.T) {
+func TestAuthURL(t *testing.T) {
 	router := httprouter.New()
-	router.GET("/auth/new/:provider", AuthUrl)
+	router.GET("/auth/new/:provider", AuthURL)
 
 	r, _ := http.NewRequest("GET", "/auth/new/random", nil)
 	w := httptest.NewRecorder()
@@ -39,17 +39,17 @@ func TestAuthUrl(t *testing.T) {
 	}
 
 	dec := json.NewDecoder(w.Body)
-	var v AuthUrlJSON
+	var v AuthURLjson
 	if err := dec.Decode(&v); err != nil {
 		t.Errorf("Error while decoding json: %s", err.Error())
 	}
 
-	parsedUri, err := url.Parse(v.URL)
+	parsedURI, err := url.Parse(v.URL)
 	if err != nil {
 		t.Errorf("Error while validating URL: %s", err.Error())
 	}
 
-	if !parsedUri.IsAbs() {
+	if !parsedURI.IsAbs() {
 		t.Errorf("Want an absolute URL, got: %s", v.URL)
 	}
 }

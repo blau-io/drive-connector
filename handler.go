@@ -7,16 +7,22 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-type AuthUrlJSON struct {
+// AuthURLjson is the struct which will be encoded into JSON once it's been
+// initialized by AuthURL().
+type AuthURLjson struct {
 	URL string
 }
 
 func Add(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 }
 
-func AuthUrl(w http.ResponseWriter, r *http.Request,
+// AuthURL gets an oauth2 URL from one of the supported libraries (depending
+// on httprouter.Params) and returns the link encoded in JSON.
+// If httprouter.Params specify an unsupported library, http.StatusNotFound
+// is returned.
+func AuthURL(w http.ResponseWriter, r *http.Request,
 	ps httprouter.Params) {
-	var a = AuthUrlJSON{}
+	var a = AuthURLjson{}
 
 	switch ps.ByName("provider") {
 	default:
@@ -24,7 +30,7 @@ func AuthUrl(w http.ResponseWriter, r *http.Request,
 		return
 
 	case "google":
-		a = AuthUrlJSON{URL: "http://google.com"}
+		a = AuthURLjson{URL: "http://google.com"}
 	}
 
 	w.Header().Set("Content-Type", "application/json")
