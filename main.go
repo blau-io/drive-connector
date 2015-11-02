@@ -22,13 +22,13 @@ func init() {
 		"client_secret.json", "Path to the Google Drive client secret file")
 	flag.IntVar(&globalFlags.Port, "port", 80, "The Port to listen on")
 	flag.Parse()
-
-	if err := google.Config(globalFlags.GoogleSecretFile); err != nil {
-		log.Fatalf("Could not configure Google integration: %s", err.Error())
-	}
 }
 
 func main() {
+	if err := google.Config(globalFlags.GoogleSecretFile); err != nil {
+		log.Fatalf("Could not configure Google integration: %s", err.Error())
+	}
+
 	router := httprouter.New()
 
 	// Browse

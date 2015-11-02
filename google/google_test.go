@@ -5,7 +5,6 @@ import (
 )
 
 func TestAuthUrl(t *testing.T) {
-
 }
 
 func TestConfig(t *testing.T) {
