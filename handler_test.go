@@ -10,27 +10,31 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+var AuthURLtable = []struct {
+	url  string
+	code int
+}{
+	{"/auth/new/random", http.StatusNotFound},
+	{"/auth/new/google", http.StatusOK},
+}
+
 func TestAdd(t *testing.T) {
 }
 
 func TestAuthURL(t *testing.T) {
+	var w *httptest.ResponseRecorder
+
 	router := httprouter.New()
 	router.GET("/auth/new/:provider", AuthURL)
 
-	r, _ := http.NewRequest("GET", "/auth/new/random", nil)
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, r)
+	for _, test := range AuthURLtable {
+		r, _ := http.NewRequest("GET", test.url, nil)
+		w = httptest.NewRecorder()
+		router.ServeHTTP(w, r)
 
-	if w.Code != http.StatusNotFound {
-		t.Errorf("Wanted Status 404, got %d", w.Code)
-	}
-
-	r, _ = http.NewRequest("GET", "/auth/new/google", nil)
-	w = httptest.NewRecorder()
-	router.ServeHTTP(w, r)
-
-	if w.Code != http.StatusOK {
-		t.Errorf("Wanted Status 200, got %d", w.Code)
+		if w.Code != test.code {
+			t.Errorf("Wanted Status %d, got %d", test.code, w.Code)
+		}
 	}
 
 	if w.Header().Get("Content-Type") != "application/json" {

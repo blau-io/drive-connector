@@ -41,7 +41,7 @@ func main() {
 	router.DELETE("/remove/*filepath", Remove)
 
 	// Auth
-	router.GET("/auth/new/:provider", AuthUrl)
+	router.GET("/auth/new/:provider", AuthURL)
 	router.POST("/auth/validate", Validate)
 
 	// Add (Create)
