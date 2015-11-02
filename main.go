@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/blau-io/warehouse-manager/google"
+	"github.com/blau-io/warehouse-manager/googledrive"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -25,7 +25,7 @@ func init() {
 }
 
 func main() {
-	if err := google.Config(globalFlags.GoogleSecretFile); err != nil {
+	if err := googledrive.Config(globalFlags.GoogleSecretFile); err != nil {
 		log.Fatalf("Could not configure Google integration: %s", err.Error())
 	}
 
