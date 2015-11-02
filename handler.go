@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/blau-io/warehouse-manager/googledrive"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -29,7 +30,7 @@ func AuthURL(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 
 	case "google":
-		a = AuthURLjson{URL: "http://google.com"}
+		a = AuthURLjson{URL: googledrive.AuthURL()}
 	}
 
 	w.Header().Set("Content-Type", "application/json")
