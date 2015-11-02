@@ -20,8 +20,7 @@ func Add(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 // on httprouter.Params) and returns the link encoded in JSON.
 // If httprouter.Params specify an unsupported library, http.StatusNotFound
 // is returned.
-func AuthURL(w http.ResponseWriter, r *http.Request,
-	ps httprouter.Params) {
+func AuthURL(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	var a = AuthURLjson{}
 
 	switch ps.ByName("provider") {
