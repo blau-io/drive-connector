@@ -3,15 +3,16 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/blau-io/warehouse-manager/googledrive"
 	"github.com/julienschmidt/httprouter"
 )
 
-// AuthURLjson is the struct which will be encoded into JSON once it's been
+// AuthURLJSON is the struct which will be encoded into JSON once it's been
 // initialized by AuthURL().
-type AuthURLjson struct {
-	URL string
+type AuthURLJSON struct {
+	URL string `json:"url"`
 }
 
 // AuthURL gets an oauth2 URL from one of the supported libraries (depending
@@ -19,7 +20,7 @@ type AuthURLjson struct {
 // If httprouter.Params specify an unsupported library, http.StatusNotFound
 // is returned.
 func AuthURL(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	var a = AuthURLjson{}
+	var a = AuthURLJSON{}
 
 	switch ps.ByName("provider") {
 	default:
@@ -27,16 +28,23 @@ func AuthURL(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 
 	case "google":
-		a = AuthURLjson{URL: googledrive.AuthURL()}
+		a = AuthURLJSON{URL: googledrive.AuthURL()}
 	}
 
-	w.Header().Set("Content-Type", "application/json")
 	j, err := json.Marshal(a)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte(j))
+}
+
+// ValidateJSON is the struct which will be encoded into JSON once it's been
+// initialized by Validate().
+type ValidateJSON struct {
+	Token  string    `json:"access_token"`
+	Expiry time.Time `json:"expiry,omitempty"`
 }
 
 // Validate reads the Form Values of a request and validates the oauth2.
@@ -44,7 +52,25 @@ func AuthURL(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 func Validate(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	state := r.FormValue("state")
 
-	if state == "" {
+	// TODO: validate state token and map to a specific provider
+	if state != "google" {
 		http.Error(w, "Missing form values in request", http.StatusBadRequest)
+		return
 	}
+
+	token, expiry, err := googledrive.Validate(r.FormValue("code"))
+	if err != nil {
+		http.Error(w, "Auth Code invalid", http.StatusBadRequest)
+		return
+	}
+
+	v := ValidateJSON{Token: token, Expiry: expiry}
+
+	j, err := json.Marshal(v)
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte(j))
 }

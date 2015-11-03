@@ -16,6 +16,7 @@ var authURLtable = []struct {
 	status int
 }{
 	{"/auth/new/random", http.StatusNotFound},
+	//	{"/auth/new/google", http.StatusOK},
 }
 
 func TestAuthURL(t *testing.T) {
@@ -42,7 +43,7 @@ func TestAuthURL(t *testing.T) {
 		}
 
 		dec := json.NewDecoder(w.Body)
-		var v AuthURLjson
+		var v AuthURLJSON
 		if err := dec.Decode(&v); err != nil {
 			t.Errorf("Error while decoding json: %s", err.Error())
 			continue
@@ -68,7 +69,8 @@ var validateTable = []struct {
 	status     int
 }{
 	{"", "", "", "", http.StatusBadRequest},
-	{"state", "google", "code", "test", http.StatusOK},
+	{"state", "random", "code", "test", http.StatusBadRequest},
+	//	{"state", "google", "code", "test", http.StatusOK},
 }
 
 func TestValidate(t *testing.T) {
@@ -87,6 +89,25 @@ func TestValidate(t *testing.T) {
 		if w.Code != test.status {
 			t.Errorf("Wanted Status %d, got %d", test.status, w.Code)
 		}
-	}
 
+		if w.Code != http.StatusOK {
+			continue
+		}
+
+		if w.Header().Get("Content-Type") != "application/json" {
+			t.Errorf("Wanted Content-Type application/json, got %s",
+				w.Header().Get("Content-Type"))
+		}
+
+		dec := json.NewDecoder(w.Body)
+		var v ValidateJSON
+		if err := dec.Decode(&v); err != nil {
+			t.Errorf("Error while decoding json: %s", err.Error())
+			continue
+		}
+
+		if v.Token == "" {
+			t.Error("Got an empty token")
+		}
+	}
 }

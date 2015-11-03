@@ -2,6 +2,7 @@ package googledrive
 
 import (
 	"io/ioutil"
+	"time"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -11,6 +12,10 @@ import (
 var (
 	config *oauth2.Config
 )
+
+func AuthURL() string {
+	return config.AuthCodeURL("google", oauth2.AccessTypeOffline)
+}
 
 func Config(filepath string) error {
 	secret, err := ioutil.ReadFile(filepath)
@@ -26,6 +31,7 @@ func Config(filepath string) error {
 	return nil
 }
 
-func AuthURL() string {
-	return config.AuthCodeURL("google", oauth2.AccessTypeOffline)
+func Validate(code string) (string, time.Time, error) {
+	token, err := config.Exchange(oauth2.NoContext, code)
+	return token.AccessToken, token.Expiry, err
 }
