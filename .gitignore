@@ -35,3 +35,7 @@ src/
 Session.vim
 .netrwhist
 *~
+
+### Project related ###
+client_secret.json
+warehouse-manager

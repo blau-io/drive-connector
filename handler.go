@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/blau-io/warehouse-manager/googledrive"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -11,9 +12,6 @@ import (
 // initialized by AuthURL().
 type AuthURLjson struct {
 	URL string
-}
-
-func Add(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 }
 
 // AuthURL gets an oauth2 URL from one of the supported libraries (depending
@@ -29,7 +27,7 @@ func AuthURL(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 
 	case "google":
-		a = AuthURLjson{URL: "http://google.com"}
+		a = AuthURLjson{URL: googledrive.AuthURL()}
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -41,17 +39,12 @@ func AuthURL(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Write([]byte(j))
 }
 
-func Browse(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-}
-
-func Publish(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-}
-
-func Read(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-}
-
-func Remove(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-}
-
+// Validate reads the Form Values of a request and validates the oauth2.
+// After the code is validated, it returns the user token.
 func Validate(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	state := r.FormValue("state")
+
+	if state == "" {
+		http.Error(w, "Missing form values in request", http.StatusBadRequest)
+	}
 }
