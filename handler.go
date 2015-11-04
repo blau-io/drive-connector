@@ -47,6 +47,7 @@ func AuthURL(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	if a.URL == "" {
 		http.Error(w, "Provider not configured", http.StatusServiceUnavailable)
+		return
 	}
 
 	j, err := json.Marshal(a)

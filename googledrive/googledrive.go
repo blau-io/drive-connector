@@ -4,6 +4,7 @@ import (
 	"errors"
 	"io"
 	"io/ioutil"
+	"strings"
 	"time"
 
 	"golang.org/x/net/context"
@@ -27,11 +28,27 @@ func Add(code string, body io.ReadCloser, filepath string) error {
 		AccessToken: code,
 	}
 
-	_, err := drive.New(config.Client(context.Background(), token))
+	client, err := drive.New(config.Client(context.Background(), token))
 	if err != nil {
 		return err
 	}
 
+	parent, err := getParent(client, filepath)
+	if err != nil {
+		return err
+	}
+
+	paths := strings.Split(sanitize(filepath), "/")
+	file := &drive.File{
+		Title:   paths[len(paths)-1],
+		Parents: []*drive.ParentReference{parent},
+	}
+
+	if _, err = client.Files.Insert(file).Media(body).Do(); err != nil {
+		return err
+	}
+
+	body.Close()
 	return nil
 }
 
