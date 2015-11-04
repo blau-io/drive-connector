@@ -4,8 +4,8 @@ This is a simple wrapper for different cloud storage providers (i.e. Google Driv
 
 
 [![Build Status](https://travis-ci.org/blau-io/warehouse-manager.svg)](https://travis-ci.org/blau-io/warehouse-manager)
-
 [![Coverage Status](https://coveralls.io/repos/blau-io/warehouse-manager/badge.svg?branch=master&service=github)](https://coveralls.io/github/blau-io/warehouse-manager?branch=master)
+[![Go Report Card](http://goreportcard.com/badge/blau-io/warehouse-manager)](http://goreportcard.com/report/blau-io/warehouse-manager)
 
 Inspired by such acronyms as *CRUD* or *BREAD*, this API can best be described as *BRRAAP* (after the distinctive sound of a motorcycle): **B**rowse, **R**ead, **R**emove, **A**uthenticate, **A**dd, **P**ublish.
 
