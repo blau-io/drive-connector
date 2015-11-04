@@ -40,6 +40,6 @@ func main() {
 	router.GET("/auth/new/:provider", AuthURL)
 	router.POST("/auth/validate", Validate)
 
-	log.Println("Listening on port " + strconv.Itoa(globalFlags.Port))
+	log.Printf("Listening on port %d\n", globalFlags.Port)
 	log.Println(http.ListenAndServe(":"+strconv.Itoa(globalFlags.Port), router))
 }

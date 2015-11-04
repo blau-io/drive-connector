@@ -45,6 +45,10 @@ func AuthURL(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		a = AuthURLJSON{URL: googledrive.AuthURL()}
 	}
 
+	if a.URL == "" {
+		http.Error(w, "Provider not configured", http.StatusServiceUnavailable)
+	}
+
 	j, err := json.Marshal(a)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -66,13 +70,20 @@ type ValidateJSON struct {
 func Validate(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	state := r.FormValue("state")
 
+	var err error
+	var token string
+	var expiry time.Time
+
 	// TODO: validate state token and map to a specific provider
-	if state != "google" {
+	switch state {
+	default:
 		http.Error(w, "Invalid state token", http.StatusBadRequest)
 		return
+
+	case "google":
+		token, expiry, err = googledrive.Validate(r.FormValue("code"))
 	}
 
-	token, expiry, err := googledrive.Validate(r.FormValue("code"))
 	if err != nil {
 		http.Error(w, "Auth Code invalid", http.StatusBadRequest)
 		return

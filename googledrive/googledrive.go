@@ -1,6 +1,7 @@
 package googledrive
 
 import (
+	"errors"
 	"io"
 	"io/ioutil"
 	"time"
@@ -12,11 +13,16 @@ import (
 )
 
 var (
-	config *oauth2.Config
+	config     *oauth2.Config
+	configured = false
 )
 
 // Add inserts a new file on Google Drive
 func Add(code string, body io.ReadCloser, filepath string) error {
+	if !configured {
+		return errors.New("Google Drive is not configured")
+	}
+
 	token := &oauth2.Token{
 		AccessToken: code,
 	}
@@ -31,6 +37,10 @@ func Add(code string, body io.ReadCloser, filepath string) error {
 
 // AuthURL returns a URL to the Google OAuth2 login page
 func AuthURL() string {
+	if !configured {
+		return ""
+	}
+
 	return config.AuthCodeURL("google", oauth2.AccessTypeOffline)
 }
 
@@ -48,12 +58,17 @@ func Config(filepath string) error {
 		return err
 	}
 
+	configured = true
 	return nil
 }
 
 // Validate validates an access code against the oauth2.config object. It
 // then returns the real token togehter with an expiry date.
 func Validate(code string) (string, time.Time, error) {
+	if !configured {
+		return "", time.Now(), errors.New("Google Drive is not configured")
+	}
+
 	token, err := config.Exchange(oauth2.NoContext, code)
 	return token.AccessToken, token.Expiry, err
 }
