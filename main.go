@@ -33,6 +33,9 @@ func init() {
 func main() {
 	router := httprouter.New()
 
+	// Add
+	router.POST("/auth/new/*filepath", Add)
+
 	// Auth
 	router.GET("/auth/new/:provider", AuthURL)
 	router.POST("/auth/validate", Validate)

@@ -9,6 +9,20 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+// Add adds a new file to a the cloud storage provider listed in the cookie
+func Add(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	cookie, err := r.Cookie("token")
+	if err != nil {
+		http.Error(w, "Invalid oauth token", http.StatusUnauthorized)
+		return
+	}
+
+	err = googledrive.Add(cookie.Value, r.Body, ps.ByName("filename"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+}
+
 // AuthURLJSON is the struct which will be encoded into JSON once it's been
 // initialized by AuthURL().
 type AuthURLJSON struct {
@@ -54,7 +68,7 @@ func Validate(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	// TODO: validate state token and map to a specific provider
 	if state != "google" {
-		http.Error(w, "Missing form values in request", http.StatusBadRequest)
+		http.Error(w, "Invalid state token", http.StatusBadRequest)
 		return
 	}
 

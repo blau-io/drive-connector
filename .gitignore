@@ -27,6 +27,7 @@ _testmain.go
 bin/
 src/
 *.out
+*.html
 
 ### Vim ###
 [._]*.s[a-w][a-z]

@@ -1,9 +1,11 @@
 package googledrive
 
 import (
+	"io"
 	"io/ioutil"
 	"time"
 
+	"golang.org/x/net/context"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/drive/v2"
@@ -12,6 +14,20 @@ import (
 var (
 	config *oauth2.Config
 )
+
+// Add inserts a new file on Google Drive
+func Add(code string, body io.ReadCloser, filepath string) error {
+	token := &oauth2.Token{
+		AccessToken: code,
+	}
+
+	_, err := drive.New(config.Client(context.Background(), token))
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
 
 // AuthURL returns a URL to the Google OAuth2 login page
 func AuthURL() string {

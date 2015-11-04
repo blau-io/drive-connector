@@ -11,19 +11,49 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-var authURLtable = []struct {
-	url    string
-	status int
-}{
-	{"/auth/new/random", http.StatusNotFound},
-	//	{"/auth/new/google", http.StatusOK},
+func TestAdd(t *testing.T) {
+	router := httprouter.New()
+	router.POST("/add/*filepath", Add)
+
+	var addTestTable = []struct {
+		file   string
+		token  string
+		status int
+	}{
+		{"", "", http.StatusUnauthorized},
+		//		{"", "random", http.StatusBadRequest},
+		{"test", "random", http.StatusOK},
+	}
+
+	for _, test := range addTestTable {
+		w := httptest.NewRecorder()
+		r, _ := http.NewRequest("POST", "http://foo.bar/add/"+test.file, nil)
+
+		if test.token != "" {
+			r.AddCookie(&http.Cookie{Name: "token", Value: test.token})
+		}
+
+		router.ServeHTTP(w, r)
+
+		if w.Code != test.status {
+			t.Errorf("Wanted Status %d, got %d", test.status, w.Code)
+		}
+	}
 }
 
 func TestAuthURL(t *testing.T) {
 	router := httprouter.New()
 	router.GET("/auth/new/:provider", AuthURL)
 
-	for _, test := range authURLtable {
+	var authURLTestTable = []struct {
+		url    string
+		status int
+	}{
+		{"/auth/new/random", http.StatusNotFound},
+		//	{"/auth/new/google", http.StatusOK},
+	}
+
+	for _, test := range authURLTestTable {
 		r, _ := http.NewRequest("GET", test.url, nil)
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, r)
@@ -61,20 +91,20 @@ func TestAuthURL(t *testing.T) {
 	}
 }
 
-var validateTable = []struct {
-	formkey1   string
-	formvalue1 string
-	formkey2   string
-	formvalue2 string
-	status     int
-}{
-	{"", "", "", "", http.StatusBadRequest},
-	{"state", "random", "code", "test", http.StatusBadRequest},
-	//	{"state", "google", "code", "test", http.StatusOK},
-}
-
 func TestValidate(t *testing.T) {
-	for _, test := range validateTable {
+	var validateTestTable = []struct {
+		formkey1   string
+		formvalue1 string
+		formkey2   string
+		formvalue2 string
+		status     int
+	}{
+		{"", "", "", "", http.StatusBadRequest},
+		{"state", "random", "code", "test", http.StatusBadRequest},
+		//	{"state", "google", "code", "test", http.StatusOK},
+	}
+
+	for _, test := range validateTestTable {
 		form := url.Values{}
 		form.Set(test.formkey1, test.formvalue1)
 		form.Set(test.formkey2, test.formvalue2)
