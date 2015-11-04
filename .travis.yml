@@ -11,4 +11,5 @@ script:
   - go test -coverprofile=main.coverprofile
   - $HOME/gopath/bin/gover
   - $HOME/gopath/bin/goveralls -coverprofile=gover.coverprofile -service=travis-ci
-
+notifications:
+  slack: $SLACK_TOKEN

@@ -30,7 +30,7 @@ func getFileByPath(sv *drive.Service, path string) (*drive.File, error) {
 	}
 
 	if len(list.Items) == 0 {
-		err := fmt.Errof("Could not find file %s", title)
+		err := fmt.Errorf("Could not find file %s", title)
 		return nil, err
 	}
 
