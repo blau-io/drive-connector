@@ -8,10 +8,6 @@ import (
 )
 
 func TestGetFileByPath(t *testing.T) {
-	if _, err := getFileByPath(nil, ""); err == nil {
-		t.Error("Should fail with missing configuration")
-	}
-
 	var fileTable = []struct {
 		filepath string
 		title    string
@@ -36,10 +32,6 @@ func TestGetFileByPath(t *testing.T) {
 }
 
 func TestGetParent(t *testing.T) {
-	if _, err := getParent(nil, ""); err == nil {
-		t.Error("Should fail with missing configuration")
-	}
-
 	var parentTable = []struct {
 		filepath string
 		parent   string

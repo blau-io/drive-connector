@@ -1,7 +1,6 @@
 package googledrive
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 
@@ -9,10 +8,6 @@ import (
 )
 
 func getFileByPath(sv *drive.Service, path string) (*drive.File, error) {
-	if sv == nil {
-		return nil, errors.New("No drive.Service pointer passed")
-	}
-
 	paths := strings.Split(sanitize(path), "/")
 	title := paths[len(paths)-1]
 
@@ -38,10 +33,6 @@ func getFileByPath(sv *drive.Service, path string) (*drive.File, error) {
 }
 
 func getParent(sv *drive.Service, path string) (*drive.ParentReference, error) {
-	if sv == nil {
-		return nil, errors.New("No drive.Service pointer passed")
-	}
-
 	paths := strings.Split(sanitize(path), "/")
 	if len(paths) == 1 {
 		return &drive.ParentReference{Id: "root"}, nil

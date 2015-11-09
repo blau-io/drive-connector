@@ -11,35 +11,35 @@ import (
 )
 
 var (
-	globalFlags struct {
+	flags struct {
 		GoogleSecretFile string
 		Port             int
 	}
+	gd *googledrive.GoogleDrive
 )
 
 func init() {
-	flag.StringVar(&globalFlags.GoogleSecretFile, "secretFile", "",
-		"Path to the Google Drive client secret file")
-	flag.IntVar(&globalFlags.Port, "port", 80, "The Port to listen on")
+	flag.StringVar(&flags.GoogleSecretFile, "secretFile",
+		"client_secret.json", "Path to the Google Drive client secret file")
+	flag.IntVar(&flags.Port, "port", 80, "The Port to listen on")
 	flag.Parse()
 
-	if globalFlags.GoogleSecretFile != "" {
-		if err := googledrive.Config(globalFlags.GoogleSecretFile); err != nil {
-			log.Fatalf("Could not configure Google integration: %s", err.Error())
-		}
+	var err error
+	gd, err = googledrive.NewGoogleDrive(flags.GoogleSecretFile)
+	if err != nil {
+		log.Printf("Error: %s\n", err.Error())
+		log.Println("Google Drive not configured, proceeding...")
+		gd = &googledrive.GoogleDrive{}
 	}
 }
 
 func main() {
 	router := httprouter.New()
 
-	// Add
-	router.POST("/auth/new/*filepath", Add)
-
-	// Auth
+	router.POST("/add/*filepath", Add)
 	router.GET("/auth/new/:provider", AuthURL)
 	router.POST("/auth/validate", Validate)
 
-	log.Printf("Listening on port %d\n", globalFlags.Port)
-	log.Println(http.ListenAndServe(":"+strconv.Itoa(globalFlags.Port), router))
+	log.Printf("Listening on port %d\n", flags.Port)
+	log.Fatalln(http.ListenAndServe(":"+strconv.Itoa(flags.Port), router))
 }

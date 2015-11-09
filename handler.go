@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/blau-io/warehouse-manager/googledrive"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -17,7 +16,7 @@ func Add(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
-	err = googledrive.Add(cookie.Value, r.Body, ps.ByName("filename"))
+	err = gd.Add(cookie.Value, r.Body, ps.ByName("filepath"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
@@ -42,7 +41,7 @@ func AuthURL(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 
 	case "google":
-		a = AuthURLJSON{URL: googledrive.AuthURL()}
+		a = AuthURLJSON{URL: gd.AuthURL()}
 	}
 
 	if a.URL == "" {
@@ -82,7 +81,7 @@ func Validate(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 
 	case "google":
-		token, expiry, err = googledrive.Validate(r.FormValue("code"))
+		token, expiry, err = gd.Validate(r.FormValue("code"))
 	}
 
 	if err != nil {

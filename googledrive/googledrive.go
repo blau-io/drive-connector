@@ -13,22 +13,24 @@ import (
 	"google.golang.org/api/drive/v2"
 )
 
-var (
-	config     *oauth2.Config
-	configured = false
-)
+// GoogleDrive holds the configuration for the Google Drive SDK
+type GoogleDrive struct {
+	config *oauth2.Config
+}
 
 // Add inserts a new file on Google Drive
-func Add(code string, body io.ReadCloser, filepath string) error {
-	if !configured {
-		return errors.New("Google Drive is not configured")
+func (d *GoogleDrive) Add(code string, content io.ReadCloser,
+	filepath string) error {
+	if filepath == "/" {
+		return errors.New("No filepath specified")
 	}
 
-	token := &oauth2.Token{
-		AccessToken: code,
+	if d.config == nil {
+		return nil
 	}
 
-	client, err := drive.New(config.Client(context.Background(), token))
+	token := &oauth2.Token{AccessToken: code}
+	client, err := drive.New(d.config.Client(context.Background(), token))
 	if err != nil {
 		return err
 	}
@@ -44,48 +46,47 @@ func Add(code string, body io.ReadCloser, filepath string) error {
 		Parents: []*drive.ParentReference{parent},
 	}
 
-	if _, err = client.Files.Insert(file).Media(body).Do(); err != nil {
+	if _, err = client.Files.Insert(file).Media(content).Do(); err != nil {
 		return err
 	}
 
-	body.Close()
+	content.Close()
 	return nil
 }
 
 // AuthURL returns a URL to the Google OAuth2 login page
-func AuthURL() string {
-	if !configured {
+func (d *GoogleDrive) AuthURL() string {
+	if d.config == nil {
 		return ""
 	}
 
-	return config.AuthCodeURL("google", oauth2.AccessTypeOffline)
+	return d.config.AuthCodeURL("google", oauth2.AccessTypeOffline)
 }
 
-// Config reads the information from the client_secret.json file and
-// parses it into the global config object, so the other functions can
-// access it.
-func Config(filepath string) error {
+// NewGoogleDrive reads the information from the supplied secret file and
+// parses it into the config of a new googledrive object. It returns the newly
+// created object.
+func NewGoogleDrive(filepath string) (*GoogleDrive, error) {
 	secret, err := ioutil.ReadFile(filepath)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	config, err = google.ConfigFromJSON(secret, drive.DriveScope)
+	config, err := google.ConfigFromJSON(secret, drive.DriveScope)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	configured = true
-	return nil
+	return &GoogleDrive{config: config}, nil
 }
 
-// Validate validates an access code against the oauth2.config object. It
+// validate validates an access code against the oauth2.config object. It
 // then returns the real token togehter with an expiry date.
-func Validate(code string) (string, time.Time, error) {
-	if !configured {
-		return "", time.Now(), errors.New("Google Drive is not configured")
+func (d *GoogleDrive) Validate(code string) (string, time.Time, error) {
+	if d.config == nil {
+		return "", time.Now(), nil
 	}
 
-	token, err := config.Exchange(oauth2.NoContext, code)
+	token, err := d.config.Exchange(oauth2.NoContext, code)
 	return token.AccessToken, token.Expiry, err
 }
