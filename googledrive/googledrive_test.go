@@ -68,7 +68,16 @@ func TestNewGoogleDrive(t *testing.T) {
 }
 
 func TestValidate(t *testing.T) {
+	tmpG := GoogleDrive{}
+	if _, _, err := tmpG.Validate(""); err != nil {
+		t.Error("Empty config should fail silently")
+	}
+
 	if _, _, err := g.Validate(""); err == nil {
 		t.Error("Validation should fail with empty token")
+	}
+
+	if _, _, err := g.Validate("invalid"); err == nil {
+		t.Error("an invalid code should fail")
 	}
 }

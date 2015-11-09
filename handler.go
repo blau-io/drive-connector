@@ -44,10 +44,7 @@ func AuthURL(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		a = AuthURLJSON{URL: gd.AuthURL()}
 	}
 
-	j, err := json.Marshal(a)
-	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-	}
+	j, _ := json.Marshal(a)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte(j))
@@ -84,12 +81,7 @@ func Validate(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
-	v := ValidateJSON{Token: token, Expiry: expiry}
-
-	j, err := json.Marshal(v)
-	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-	}
+	j, _ := json.Marshal(ValidateJSON{Token: token, Expiry: expiry})
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte(j))

@@ -7,51 +7,16 @@ import (
 	"google.golang.org/api/drive/v2"
 )
 
-func TestGetFileByPath(t *testing.T) {
-	var fileTable = []struct {
-		filepath string
-		title    string
-	}{
-	//		{"index.html", "index.html"},
-	}
-
-	//service, _ := drive.New(http.DefaultClient)
-
-	for _, test := range fileTable {
-		file, err := getFileByPath(nil, test.filepath)
-		if err != nil {
-			t.Error(err.Error())
-			continue
-		}
-
-		if file.Title != test.title {
-			t.Errorf("Expected title %s, got %s", test.title, file.Title)
-		}
-	}
-
-}
-
 func TestGetParent(t *testing.T) {
-	var parentTable = []struct {
-		filepath string
-		parent   string
-	}{
-		{"", "root"},
-		//	{"/foo/bar/index.html", "bar"},
-	}
-
 	service, _ := drive.New(http.DefaultClient)
 
-	for _, test := range parentTable {
-		parent, err := getParent(service, test.filepath)
-		if err != nil {
-			t.Error(err.Error())
-			continue
-		}
+	parent, err := getParent(service, "")
+	if err != nil {
+		t.Error(err.Error())
+	}
 
-		if parent.Id != test.parent {
-			t.Errorf("Wanted parent id = %s, got %s", test.filepath, parent.Id)
-		}
+	if parent.Id != "root" {
+		t.Errorf("Wanted parent id = 'root', got %s", parent.Id)
 	}
 }
 
