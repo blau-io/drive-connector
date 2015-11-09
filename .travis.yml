@@ -10,7 +10,8 @@ script:
   - go test -coverprofile=googledrive.coverprofile ./googledrive
   - go test -coverprofile=main.coverprofile
   - $HOME/gopath/bin/gover
-  - $HOME/gopath/bin/goveralls -coverprofile=gover.coverprofile -service=travis-ci
+  - $HOME/gopath/bin/goveralls -coverprofile=gover.coverprofile \
+    -service=travis-ci
 notifications:
-  slack: blau-io:$SLACK_TOKEN
+  slack: $SLACK_TOKEN
   email: false

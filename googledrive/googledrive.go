@@ -58,7 +58,7 @@ func (d *GoogleDrive) AuthURL() string {
 }
 
 // Browse return the content of a directory as a list
-func (d *GoogleDrive) Browse(code string, filepath string) ([]string, error) {
+func (d *GoogleDrive) Browse(code, filepath string) ([]string, error) {
 	client, _ := getClient(d.config, code)
 	if client == nil {
 		return nil, nil
@@ -81,6 +81,26 @@ func (d *GoogleDrive) Browse(code string, filepath string) ([]string, error) {
 	}
 
 	return out, nil
+}
+
+// Delete deletes a file from Google Drive
+func (d *GoogleDrive) Delete(code, filepath string) error {
+	client, _ := getClient(d.config, code)
+	if client == nil {
+		return nil
+	}
+
+	file, err := getFileByPath(client, filepath)
+	if err != nil {
+		return err
+	}
+
+	err = client.Files.Delete(file.Id).Do()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // NewGoogleDrive reads the information from the supplied secret file and

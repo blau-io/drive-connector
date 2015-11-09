@@ -12,7 +12,7 @@ import (
 func Add(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	cookie, err := r.Cookie("token")
 	if err != nil {
-		http.Error(w, "Invalid oauth token", http.StatusUnauthorized)
+		http.Error(w, "User not authenticated", http.StatusUnauthorized)
 		return
 	}
 
@@ -60,7 +60,7 @@ type BrowseJSON struct {
 func Browse(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	cookie, err := r.Cookie("token")
 	if err != nil {
-		http.Error(w, "Invalid oauth token", http.StatusUnauthorized)
+		http.Error(w, "authenticated", http.StatusUnauthorized)
 		return
 	}
 
@@ -73,6 +73,20 @@ func Browse(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte(j))
+}
+
+// Delete deletes the given file
+func Delete(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	cookie, err := r.Cookie("token")
+	if err != nil {
+		http.Error(w, "User not authenticated", http.StatusUnauthorized)
+		return
+	}
+
+	err = gd.Delete(cookie.Value, ps.ByName("filepath"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
 }
 
 // ValidateJSON is the struct which will be encoded into JSON once it's been

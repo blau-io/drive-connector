@@ -68,6 +68,12 @@ func TestBrowse(t *testing.T) {
 	}
 }
 
+func TestDelete(t *testing.T) {
+	if emptyG.Delete("", "") != nil {
+		t.Error("Empty config should just fail silently")
+	}
+}
+
 func TestNewGoogleDrive(t *testing.T) {
 	if _, err := NewGoogleDrive(""); err == nil {
 		t.Error("Function shoud fail if no filepath is configured")

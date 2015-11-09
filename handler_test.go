@@ -27,7 +27,7 @@ func TestAdd(t *testing.T) {
 
 	for _, test := range addTestTable {
 		w := httptest.NewRecorder()
-		r, _ := http.NewRequest("POST", "http://foo.bar/add/"+test.file, nil)
+		r, _ := http.NewRequest("POST", "http://x.co/add/"+test.file, nil)
 
 		if test.token != "" {
 			r.AddCookie(&http.Cookie{Name: "token", Value: test.token})
@@ -102,7 +102,7 @@ func TestBrowse(t *testing.T) {
 
 	for _, test := range addTestTable {
 		w := httptest.NewRecorder()
-		r, _ := http.NewRequest("GET", "http://foo.bar/browse/"+test.file, nil)
+		r, _ := http.NewRequest("GET", "http://x.co/browse/"+test.file, nil)
 
 		if test.token != "" {
 			r.AddCookie(&http.Cookie{Name: "token", Value: test.token})
@@ -131,6 +131,37 @@ func TestBrowse(t *testing.T) {
 	}
 }
 
+func TestDelete(t *testing.T) {
+	router := httprouter.New()
+	router.DELETE("/delete/*filepath", Delete)
+
+	var deleteTestTable = []struct {
+		file   string
+		token  string
+		status int
+	}{
+		{"", "", http.StatusUnauthorized},
+		//{"", "token", http.StatusBadRequest},
+		{"test", "", http.StatusUnauthorized},
+		{"test", "token", http.StatusOK},
+	}
+
+	for _, test := range deleteTestTable {
+		r, _ := http.NewRequest("DELETE", "http://x.co/delete/"+test.file, nil)
+		w := httptest.NewRecorder()
+
+		if test.token != "" {
+			r.AddCookie(&http.Cookie{Name: "token", Value: test.token})
+		}
+
+		router.ServeHTTP(w, r)
+
+		if w.Code != test.status {
+			t.Errorf("Wanted Status %d, got %d", test.status, w.Code)
+		}
+	}
+}
+
 func TestValidate(t *testing.T) {
 	var validateTestTable = []struct {
 		formkey1   string
@@ -151,7 +182,7 @@ func TestValidate(t *testing.T) {
 		form.Set(test.formkey2, test.formvalue2)
 
 		d := strings.NewReader(form.Encode())
-		r, _ := http.NewRequest("POST", "http://foo.bar", d)
+		r, _ := http.NewRequest("POST", "http://x.co", d)
 		r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 		w := httptest.NewRecorder()
 
