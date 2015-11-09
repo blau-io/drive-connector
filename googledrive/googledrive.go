@@ -21,7 +21,7 @@ type GoogleDrive struct {
 // Add inserts a new file on Google Drive
 func (d *GoogleDrive) Add(code string, content io.ReadCloser,
 	filepath string) error {
-	if filepath == "/" {
+	if filepath == "" || filepath == "/" {
 		return errors.New("No filepath specified")
 	}
 
@@ -92,5 +92,9 @@ func (d *GoogleDrive) Validate(code string) (string, time.Time, error) {
 	}
 
 	token, err := d.config.Exchange(oauth2.NoContext, code)
-	return token.AccessToken, token.Expiry, err
+	if err != nil {
+		return "", time.Now(), err
+	}
+
+	return token.AccessToken, token.Expiry, nil
 }
