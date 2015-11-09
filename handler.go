@@ -53,7 +53,7 @@ func AuthURL(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 // BrowseJSON is the struct which will be encoded into JSON once it's been
 // initialized by Browse()
 type BrowseJSON struct {
-	fileList []string `json:"file_list"`
+	FileList []string `json:"file_list"`
 }
 
 // Browse returns the content of a directory as a json list
@@ -69,7 +69,7 @@ func Browse(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
-	j, _ := json.Marshal(BrowseJSON{fileList: list})
+	j, _ := json.Marshal(BrowseJSON{FileList: list})
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte(j))

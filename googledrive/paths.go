@@ -17,7 +17,7 @@ func getFileByPath(sv *drive.Service, path string) (*drive.File, error) {
 	}
 
 	query := fmt.Sprintf("'%s' in parents and title = '%s' and trashed = false",
-		parent, title)
+		parent.Id, title)
 
 	list, err := sv.Files.List().Q(query).Do()
 	if err != nil {
