@@ -39,6 +39,7 @@ func main() {
 	router.POST("/add/*filepath", Add)
 	router.GET("/auth/new/:provider", AuthURL)
 	router.POST("/auth/validate", Validate)
+	router.GET("/browse/*filepath", Browse)
 
 	log.Printf("Listening on port %d\n", flags.Port)
 	log.Fatalln(http.ListenAndServe(":"+strconv.Itoa(flags.Port), router))

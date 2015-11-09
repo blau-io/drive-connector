@@ -50,6 +50,31 @@ func AuthURL(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Write([]byte(j))
 }
 
+// BrowseJSON is the struct which will be encoded into JSON once it's been
+// initialized by Browse()
+type BrowseJSON struct {
+	fileList []string `json:"file_list"`
+}
+
+// Browse returns the content of a directory as a json list
+func Browse(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	cookie, err := r.Cookie("token")
+	if err != nil {
+		http.Error(w, "Invalid oauth token", http.StatusUnauthorized)
+		return
+	}
+
+	list, err := gd.Browse(cookie.Value, ps.ByName("filepath"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+
+	j, _ := json.Marshal(BrowseJSON{fileList: list})
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte(j))
+}
+
 // ValidateJSON is the struct which will be encoded into JSON once it's been
 // initialized by Validate().
 type ValidateJSON struct {

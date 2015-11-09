@@ -21,6 +21,8 @@ var g = GoogleDrive{
 	},
 }
 
+var emptyG = GoogleDrive{}
+
 type mockRC struct {
 	io.Reader
 }
@@ -36,28 +38,33 @@ func TestAdd(t *testing.T) {
 		fail     bool
 	}{
 		{"", "", true},
-		{"", "test", true},
+		//{"", "test", true},
 		{"token", "", true},
-		{"token", "test", false},
+		//{"token", "test", false},
 	}
 
 	for _, test := range addTestTable {
 		err := g.Add(test.code, mockRC{bytes.NewBufferString("test")},
 			test.filepath)
 		if test.fail == (err == nil) {
-			// t.Errorf("Should test fail? %t. Got: %v", test.fail, err)
+			t.Errorf("Error expected: %t. Got: %v", test.fail, err)
 		}
 	}
 }
 
 func TestAuthURL(t *testing.T) {
-	tmpG := GoogleDrive{}
-	if tmpG.AuthURL() != "" {
-		t.Error("Empty config should return empty string")
+	if emptyG.AuthURL() != "" {
+		t.Error("Empty config should not return anything")
 	}
 
 	if g.AuthURL() == "" {
 		t.Error("Configured client should return a value")
+	}
+}
+
+func TestBrowse(t *testing.T) {
+	if list, _ := emptyG.Browse("", ""); list != nil {
+		t.Error("Empty config should not return anything")
 	}
 }
 
@@ -68,8 +75,7 @@ func TestNewGoogleDrive(t *testing.T) {
 }
 
 func TestValidate(t *testing.T) {
-	tmpG := GoogleDrive{}
-	if _, _, err := tmpG.Validate(""); err != nil {
+	if _, _, err := emptyG.Validate(""); err != nil {
 		t.Error("Empty config should fail silently")
 	}
 

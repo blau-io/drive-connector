@@ -12,4 +12,5 @@ script:
   - $HOME/gopath/bin/gover
   - $HOME/gopath/bin/goveralls -coverprofile=gover.coverprofile -service=travis-ci
 notifications:
-  slack: $SLACK_TOKEN
+  slack: blau-io:$SLACK_TOKEN
+  email: false

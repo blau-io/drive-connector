@@ -87,6 +87,50 @@ func TestAuthURL(t *testing.T) {
 	}
 }
 
+func TestBrowse(t *testing.T) {
+	router := httprouter.New()
+	router.GET("/browse/*filepath", Browse)
+
+	var addTestTable = []struct {
+		file   string
+		token  string
+		status int
+	}{
+		{"", "", http.StatusUnauthorized},
+		{"", "random", http.StatusOK},
+	}
+
+	for _, test := range addTestTable {
+		w := httptest.NewRecorder()
+		r, _ := http.NewRequest("GET", "http://foo.bar/browse/"+test.file, nil)
+
+		if test.token != "" {
+			r.AddCookie(&http.Cookie{Name: "token", Value: test.token})
+		}
+
+		router.ServeHTTP(w, r)
+
+		if w.Code != test.status {
+			t.Errorf("Wanted Status %d, got %d", test.status, w.Code)
+		}
+
+		if w.Code != http.StatusOK {
+			continue
+		}
+
+		if w.Header().Get("Content-Type") != "application/json" {
+			t.Errorf("Wanted Content-Type application/json, got %s",
+				w.Header().Get("Content-Type"))
+		}
+
+		dec := json.NewDecoder(w.Body)
+		var b BrowseJSON
+		if err := dec.Decode(&b); err != nil {
+			t.Errorf("Error while decoding json: %s", err.Error())
+		}
+	}
+}
+
 func TestValidate(t *testing.T) {
 	var validateTestTable = []struct {
 		formkey1   string

@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"golang.org/x/net/context"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/drive/v2"
@@ -25,14 +24,9 @@ func (d *GoogleDrive) Add(code string, content io.ReadCloser,
 		return errors.New("No filepath specified")
 	}
 
-	if d.config == nil {
+	client, _ := getClient(d.config, code)
+	if client == nil {
 		return nil
-	}
-
-	token := &oauth2.Token{AccessToken: code}
-	client, err := drive.New(d.config.Client(context.Background(), token))
-	if err != nil {
-		return err
 	}
 
 	parent, err := getParent(client, filepath)
@@ -63,6 +57,32 @@ func (d *GoogleDrive) AuthURL() string {
 	return d.config.AuthCodeURL("google", oauth2.AccessTypeOffline)
 }
 
+// Browse return the content of a directory as a list
+func (d *GoogleDrive) Browse(code string, filepath string) ([]string, error) {
+	client, _ := getClient(d.config, code)
+	if client == nil {
+		return nil, nil
+	}
+
+	folder, err := getFileByPath(client, filepath)
+	if err != nil {
+		return nil, err
+	}
+
+	query := "'" + folder.Id + "' in parents and trashed = false"
+	list, err := client.Files.List().Q(query).Do()
+	if err != nil {
+		return nil, err
+	}
+
+	out := make([]string, len(list.Items))
+	for i, v := range list.Items {
+		out[i] = v.Title
+	}
+
+	return out, nil
+}
+
 // NewGoogleDrive reads the information from the supplied secret file and
 // parses it into the config of a new googledrive object. It returns the newly
 // created object.
@@ -80,7 +100,7 @@ func NewGoogleDrive(filepath string) (*GoogleDrive, error) {
 	return &GoogleDrive{config: config}, nil
 }
 
-// validate validates an access code against the oauth2.config object. It
+// Validate validates an access code against the oauth2.config object. It
 // then returns the real token togehter with an expiry date.
 func (d *GoogleDrive) Validate(code string) (string, time.Time, error) {
 	if d.config == nil {
