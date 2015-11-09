@@ -50,7 +50,7 @@ func TestAuthURL(t *testing.T) {
 		status int
 	}{
 		{"/auth/new/random", http.StatusNotFound},
-		{"/auth/new/google", http.StatusServiceUnavailable},
+		{"/auth/new/google", http.StatusOK},
 	}
 
 	for _, test := range authURLTestTable {
@@ -79,14 +79,10 @@ func TestAuthURL(t *testing.T) {
 			continue
 		}
 
-		parsedURI, err := url.Parse(v.URL)
+		_, err := url.Parse(v.URL)
 		if err != nil {
 			t.Errorf("Error while validating URL: %s", err.Error())
 			continue
-		}
-
-		if !parsedURI.IsAbs() {
-			t.Errorf("Want an absolute URL, got: %s", v.URL)
 		}
 	}
 }
@@ -101,6 +97,7 @@ func TestValidate(t *testing.T) {
 	}{
 		{"", "", "", "", http.StatusBadRequest},
 		{"state", "random", "code", "test", http.StatusBadRequest},
+		{"state", "google", "code", "invalid", http.StatusBadRequest},
 		{"state", "google", "code", "test", http.StatusOK},
 	}
 

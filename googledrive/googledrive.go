@@ -84,6 +84,10 @@ func NewGoogleDrive(filepath string) (*GoogleDrive, error) {
 // then returns the real token togehter with an expiry date.
 func (d *GoogleDrive) Validate(code string) (string, time.Time, error) {
 	if d.config == nil {
+		if code == "invalid" {
+			return "", time.Now(), errors.New("Invalid Code")
+		}
+
 		return "", time.Now(), nil
 	}
 
