@@ -80,6 +80,26 @@ func TestNewGoogleDrive(t *testing.T) {
 	}
 }
 
+func TestPublish(t *testing.T) {
+	if _, err := g.Publish("", "/"); err == nil {
+		t.Error("Shouldn't be able to publish root folder")
+	}
+
+	if _, err := emptyG.Publish("", "test"); err != nil {
+		t.Error("Empty config should fail silently")
+	}
+}
+
+func TestRead(t *testing.T) {
+	if _, err := g.Read("", "/"); err == nil {
+		t.Error("Shouldn't be able to read a directory")
+	}
+
+	if _, err := emptyG.Read("", "test"); err != nil {
+		t.Error("Empty config should fail silently")
+	}
+}
+
 func TestValidate(t *testing.T) {
 	if _, _, err := emptyG.Validate(""); err != nil {
 		t.Error("Empty config should fail silently")

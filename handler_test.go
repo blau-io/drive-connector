@@ -91,7 +91,7 @@ func TestBrowse(t *testing.T) {
 	router := httprouter.New()
 	router.GET("/browse/*filepath", Browse)
 
-	var addTestTable = []struct {
+	var browseTestTable = []struct {
 		file   string
 		token  string
 		status int
@@ -100,7 +100,7 @@ func TestBrowse(t *testing.T) {
 		{"", "random", http.StatusOK},
 	}
 
-	for _, test := range addTestTable {
+	for _, test := range browseTestTable {
 		w := httptest.NewRecorder()
 		r, _ := http.NewRequest("GET", "http://x.co/browse/"+test.file, nil)
 
@@ -149,6 +149,81 @@ func TestDelete(t *testing.T) {
 	for _, test := range deleteTestTable {
 		r, _ := http.NewRequest("DELETE", "http://x.co/delete/"+test.file, nil)
 		w := httptest.NewRecorder()
+
+		if test.token != "" {
+			r.AddCookie(&http.Cookie{Name: "token", Value: test.token})
+		}
+
+		router.ServeHTTP(w, r)
+
+		if w.Code != test.status {
+			t.Errorf("Wanted Status %d, got %d", test.status, w.Code)
+		}
+	}
+}
+
+func TestPublish(t *testing.T) {
+	router := httprouter.New()
+	router.GET("/publish/*filepath", Publish)
+
+	var publishTestTable = []struct {
+		path   string
+		token  string
+		status int
+	}{
+		{"test", "", http.StatusUnauthorized},
+		{"", "test", http.StatusBadRequest},
+		{"test", "test", http.StatusOK},
+	}
+
+	for _, test := range publishTestTable {
+		w := httptest.NewRecorder()
+		r, _ := http.NewRequest("GET", "http://x.co/publish/"+test.path, nil)
+
+		if test.token != "" {
+			r.AddCookie(&http.Cookie{Name: "token", Value: test.token})
+		}
+
+		router.ServeHTTP(w, r)
+
+		if w.Code != test.status {
+			t.Errorf("Wanted Status %d, got %d", test.status, w.Code)
+		}
+
+		if w.Code != http.StatusOK {
+			continue
+		}
+
+		if w.Header().Get("Content-Type") != "application/json" {
+			t.Errorf("Wanted Content-Type application/json, got %s",
+				w.Header().Get("Content-Type"))
+		}
+
+		dec := json.NewDecoder(w.Body)
+		var v PublishJSON
+		if err := dec.Decode(&v); err != nil {
+			t.Errorf("Error while decoding json: %s", err.Error())
+		}
+	}
+}
+
+func TestRead(t *testing.T) {
+	router := httprouter.New()
+	router.GET("/read/*filepath", Read)
+
+	var readTestTable = []struct {
+		filepath string
+		token    string
+		status   int
+	}{
+		{"", "", http.StatusUnauthorized},
+		{"", "test", http.StatusBadRequest},
+		{"example", "test", http.StatusOK},
+	}
+
+	for _, test := range readTestTable {
+		w := httptest.NewRecorder()
+		r, _ := http.NewRequest("GET", "http://x.co/read/"+test.filepath, nil)
 
 		if test.token != "" {
 			r.AddCookie(&http.Cookie{Name: "token", Value: test.token})

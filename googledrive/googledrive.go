@@ -4,6 +4,7 @@ import (
 	"errors"
 	"io"
 	"io/ioutil"
+	"net/http"
 	"strings"
 	"time"
 
@@ -118,6 +119,61 @@ func NewGoogleDrive(filepath string) (*GoogleDrive, error) {
 	}
 
 	return &GoogleDrive{config: config}, nil
+}
+
+// Publish sets a file to public and returns its public url
+func (d *GoogleDrive) Publish(code, filepath string) (string, error) {
+	if filepath == "" || filepath == "/" {
+		return "", errors.New("Can't publish root folder")
+	}
+
+	client, _ := getClient(d.config, code)
+	if client == nil {
+		return "", nil
+	}
+
+	file, err := getFileByPath(client, filepath)
+	if err != nil {
+		return "", err
+	}
+
+	perm := &drive.Permission{
+		Value: "",
+		Type:  "anyone",
+		Role:  "reader",
+	}
+
+	_, err = drive.NewPermissionsService(client).Insert(file.Id, perm).Do()
+	if err != nil {
+		return "", err
+	}
+
+	// Get the updated file, which will now contain a public URL
+	file, err = client.Files.Get(file.Id).Do()
+	if err != nil {
+		return "", err
+	}
+
+	return file.WebViewLink, nil
+}
+
+// Read returns the content of a file
+func (d *GoogleDrive) Read(code, filepath string) (*http.Response, error) {
+	if filepath == "" || filepath == "/" {
+		return nil, errors.New("For the content of a folder, please use browse")
+	}
+
+	client, _ := getClient(d.config, code)
+	if client == nil {
+		return nil, nil
+	}
+
+	file, err := getFileByPath(client, filepath)
+	if err != nil {
+		return nil, err
+	}
+
+	return client.Files.Get(file.Id).Download()
 }
 
 // Validate validates an access code against the oauth2.config object. It

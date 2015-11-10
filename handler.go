@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"io"
 	"net/http"
 	"time"
 
@@ -87,6 +88,53 @@ func Delete(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
+}
+
+// PublishJSON is the struct which will be encoded into JSON once it's been
+// initialized by Publish
+type PublishJSON struct {
+	URL string `json:"url"`
+}
+
+// Publish sets the given file to public
+func Publish(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	cookie, err := r.Cookie("token")
+	if err != nil {
+		http.Error(w, "User not authenticated", http.StatusUnauthorized)
+		return
+	}
+
+	link, err := gd.Publish(cookie.Value, ps.ByName("filepath"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+
+	j, _ := json.Marshal(PublishJSON{URL: link})
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte(j))
+}
+
+// Read gets the given file and returns its content
+func Read(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	cookie, err := r.Cookie("token")
+	if err != nil {
+		http.Error(w, "User not authenticated", http.StatusUnauthorized)
+		return
+	}
+
+	response, err := gd.Read(cookie.Value, ps.ByName("filepath"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if response == nil {
+		return
+	}
+
+	io.Copy(w, response.Body)
+	response.Body.Close()
 }
 
 // ValidateJSON is the struct which will be encoded into JSON once it's been

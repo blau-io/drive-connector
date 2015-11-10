@@ -41,6 +41,8 @@ func main() {
 	router.POST("/auth/validate", Validate)
 	router.GET("/browse/*filepath", Browse)
 	router.DELETE("/delete/*filepath", Delete)
+	router.GET("/publish/*filepath", Publish)
+	router.GET("/read/*filepath", Read)
 
 	log.Printf("Listening on port %d\n", flags.Port)
 	log.Fatalln(http.ListenAndServe(":"+strconv.Itoa(flags.Port), router))
