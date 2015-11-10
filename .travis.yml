@@ -13,5 +13,6 @@ script:
   - $HOME/gopath/bin/goveralls -coverprofile=gover.coverprofile \
     -service=travis-ci
 notifications:
-  slack: $SLACK_TOKEN
+  slack:
+    secure: $SLACK_TOKEN
   email: false
