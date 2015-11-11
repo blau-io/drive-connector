@@ -13,7 +13,7 @@ import (
 
 func TestAdd(t *testing.T) {
 	router := httprouter.New()
-	router.POST("/add/*filepath", Add)
+	router.POST("/add/*filepath", add)
 
 	var addTestTable = []struct {
 		file   string
@@ -43,7 +43,7 @@ func TestAdd(t *testing.T) {
 
 func TestAuthURL(t *testing.T) {
 	router := httprouter.New()
-	router.GET("/auth/new/:provider", AuthURL)
+	router.GET("/auth/new/:provider", authURL)
 
 	var authURLTestTable = []struct {
 		url    string
@@ -73,7 +73,7 @@ func TestAuthURL(t *testing.T) {
 		}
 
 		dec := json.NewDecoder(w.Body)
-		var v AuthURLJSON
+		var v authURLJSON
 		if err := dec.Decode(&v); err != nil {
 			t.Errorf("Error while decoding json: %s", err.Error())
 			continue
@@ -89,7 +89,7 @@ func TestAuthURL(t *testing.T) {
 
 func TestBrowse(t *testing.T) {
 	router := httprouter.New()
-	router.GET("/browse/*filepath", Browse)
+	router.GET("/browse/*filepath", browse)
 
 	var browseTestTable = []struct {
 		file   string
@@ -124,47 +124,16 @@ func TestBrowse(t *testing.T) {
 		}
 
 		dec := json.NewDecoder(w.Body)
-		var b BrowseJSON
+		var b browseJSON
 		if err := dec.Decode(&b); err != nil {
 			t.Errorf("Error while decoding json: %s", err.Error())
 		}
 	}
 }
 
-func TestDelete(t *testing.T) {
-	router := httprouter.New()
-	router.DELETE("/delete/*filepath", Delete)
-
-	var deleteTestTable = []struct {
-		file   string
-		token  string
-		status int
-	}{
-		{"", "", http.StatusUnauthorized},
-		//{"", "token", http.StatusBadRequest},
-		{"test", "", http.StatusUnauthorized},
-		{"test", "token", http.StatusOK},
-	}
-
-	for _, test := range deleteTestTable {
-		r, _ := http.NewRequest("DELETE", "http://x.co/delete/"+test.file, nil)
-		w := httptest.NewRecorder()
-
-		if test.token != "" {
-			r.AddCookie(&http.Cookie{Name: "token", Value: test.token})
-		}
-
-		router.ServeHTTP(w, r)
-
-		if w.Code != test.status {
-			t.Errorf("Wanted Status %d, got %d", test.status, w.Code)
-		}
-	}
-}
-
 func TestPublish(t *testing.T) {
 	router := httprouter.New()
-	router.GET("/publish/*filepath", Publish)
+	router.GET("/publish/*filepath", publish)
 
 	var publishTestTable = []struct {
 		path   string
@@ -200,7 +169,7 @@ func TestPublish(t *testing.T) {
 		}
 
 		dec := json.NewDecoder(w.Body)
-		var v PublishJSON
+		var v publishJSON
 		if err := dec.Decode(&v); err != nil {
 			t.Errorf("Error while decoding json: %s", err.Error())
 		}
@@ -209,7 +178,7 @@ func TestPublish(t *testing.T) {
 
 func TestRead(t *testing.T) {
 	router := httprouter.New()
-	router.GET("/read/*filepath", Read)
+	router.GET("/read/*filepath", read)
 
 	var readTestTable = []struct {
 		filepath string
@@ -224,6 +193,37 @@ func TestRead(t *testing.T) {
 	for _, test := range readTestTable {
 		w := httptest.NewRecorder()
 		r, _ := http.NewRequest("GET", "http://x.co/read/"+test.filepath, nil)
+
+		if test.token != "" {
+			r.AddCookie(&http.Cookie{Name: "token", Value: test.token})
+		}
+
+		router.ServeHTTP(w, r)
+
+		if w.Code != test.status {
+			t.Errorf("Wanted Status %d, got %d", test.status, w.Code)
+		}
+	}
+}
+
+func TestRemove(t *testing.T) {
+	router := httprouter.New()
+	router.DELETE("/remove/*filepath", remove)
+
+	var removeTestTable = []struct {
+		file   string
+		token  string
+		status int
+	}{
+		{"", "", http.StatusUnauthorized},
+		//{"", "token", http.StatusBadRequest},
+		{"test", "", http.StatusUnauthorized},
+		{"test", "token", http.StatusOK},
+	}
+
+	for _, test := range removeTestTable {
+		r, _ := http.NewRequest("DELETE", "http://x.co/remove/"+test.file, nil)
+		w := httptest.NewRecorder()
 
 		if test.token != "" {
 			r.AddCookie(&http.Cookie{Name: "token", Value: test.token})
@@ -261,7 +261,7 @@ func TestValidate(t *testing.T) {
 		r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 		w := httptest.NewRecorder()
 
-		Validate(w, r, nil)
+		validate(w, r, nil)
 
 		if w.Code != test.status {
 			t.Errorf("Wanted Status %d, got %d", test.status, w.Code)
@@ -277,7 +277,7 @@ func TestValidate(t *testing.T) {
 		}
 
 		dec := json.NewDecoder(w.Body)
-		var v ValidateJSON
+		var v validateJSON
 		if err := dec.Decode(&v); err != nil {
 			t.Errorf("Error while decoding json: %s", err.Error())
 			continue

@@ -9,8 +9,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-// Add adds a new file to a the cloud storage provider listed in the cookie
-func Add(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func add(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	cookie, err := r.Cookie("token")
 	if err != nil {
 		http.Error(w, "User not authenticated", http.StatusUnauthorized)
@@ -23,18 +22,12 @@ func Add(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}
 }
 
-// AuthURLJSON is the struct which will be encoded into JSON once it's been
-// initialized by AuthURL().
-type AuthURLJSON struct {
+type authURLJSON struct {
 	URL string `json:"url"`
 }
 
-// AuthURL gets an oauth2 URL from one of the supported libraries (depending
-// on httprouter.Params) and returns the link encoded in JSON.
-// If httprouter.Params specify an unsupported library, http.StatusNotFound
-// is returned.
-func AuthURL(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	var a = AuthURLJSON{}
+func authURL(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	var a = authURLJSON{}
 
 	switch ps.ByName("provider") {
 	default:
@@ -42,7 +35,7 @@ func AuthURL(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 
 	case "google":
-		a = AuthURLJSON{URL: gd.AuthURL()}
+		a = authURLJSON{URL: gd.AuthURL()}
 	}
 
 	j, _ := json.Marshal(a)
@@ -51,14 +44,11 @@ func AuthURL(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Write([]byte(j))
 }
 
-// BrowseJSON is the struct which will be encoded into JSON once it's been
-// initialized by Browse()
-type BrowseJSON struct {
+type browseJSON struct {
 	FileList []string `json:"file_list"`
 }
 
-// Browse returns the content of a directory as a json list
-func Browse(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func browse(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	cookie, err := r.Cookie("token")
 	if err != nil {
 		http.Error(w, "authenticated", http.StatusUnauthorized)
@@ -70,34 +60,17 @@ func Browse(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
-	j, _ := json.Marshal(BrowseJSON{FileList: list})
+	j, _ := json.Marshal(browseJSON{FileList: list})
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte(j))
 }
 
-// Delete deletes the given file
-func Delete(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	cookie, err := r.Cookie("token")
-	if err != nil {
-		http.Error(w, "User not authenticated", http.StatusUnauthorized)
-		return
-	}
-
-	err = gd.Delete(cookie.Value, ps.ByName("filepath"))
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-	}
-}
-
-// PublishJSON is the struct which will be encoded into JSON once it's been
-// initialized by Publish
-type PublishJSON struct {
+type publishJSON struct {
 	URL string `json:"url"`
 }
 
-// Publish sets the given file to public
-func Publish(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func publish(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	cookie, err := r.Cookie("token")
 	if err != nil {
 		http.Error(w, "User not authenticated", http.StatusUnauthorized)
@@ -109,14 +82,13 @@ func Publish(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
-	j, _ := json.Marshal(PublishJSON{URL: link})
+	j, _ := json.Marshal(publishJSON{URL: link})
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte(j))
 }
 
-// Read gets the given file and returns its content
-func Read(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func read(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	cookie, err := r.Cookie("token")
 	if err != nil {
 		http.Error(w, "User not authenticated", http.StatusUnauthorized)
@@ -137,16 +109,25 @@ func Read(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	response.Body.Close()
 }
 
-// ValidateJSON is the struct which will be encoded into JSON once it's been
-// initialized by Validate().
-type ValidateJSON struct {
+func remove(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	cookie, err := r.Cookie("token")
+	if err != nil {
+		http.Error(w, "User not authenticated", http.StatusUnauthorized)
+		return
+	}
+
+	err = gd.Delete(cookie.Value, ps.ByName("filepath"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+}
+
+type validateJSON struct {
 	Token  string    `json:"access_token"`
 	Expiry time.Time `json:"expiry,omitempty"`
 }
 
-// Validate reads the Form Values of a request and validates the oauth2.
-// After the code is validated, it returns the user token.
-func Validate(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func validate(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	state := r.FormValue("state")
 
 	var err error
@@ -168,7 +149,7 @@ func Validate(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
-	j, _ := json.Marshal(ValidateJSON{Token: token, Expiry: expiry})
+	j, _ := json.Marshal(validateJSON{Token: token, Expiry: expiry})
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte(j))

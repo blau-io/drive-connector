@@ -36,13 +36,13 @@ func init() {
 func main() {
 	router := httprouter.New()
 
-	router.POST("/add/*filepath", Add)
-	router.GET("/auth/new/:provider", AuthURL)
-	router.POST("/auth/validate", Validate)
-	router.GET("/browse/*filepath", Browse)
-	router.DELETE("/delete/*filepath", Delete)
-	router.GET("/publish/*filepath", Publish)
-	router.GET("/read/*filepath", Read)
+	router.POST("/add/*filepath", add)
+	router.GET("/auth/new/:provider", authURL)
+	router.POST("/auth/validate", validate)
+	router.GET("/browse/*filepath", browse)
+	router.GET("/publish/*filepath", publish)
+	router.GET("/read/*filepath", read)
+	router.DELETE("/remove/*filepath", remove)
 
 	log.Printf("Listening on port %d\n", flags.Port)
 	log.Fatalln(http.ListenAndServe(":"+strconv.Itoa(flags.Port), router))
