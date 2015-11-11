@@ -1,18 +1,17 @@
 language: go
 go:
-  - tip
+- tip
 before_install:
-  - go get github.com/axw/gocov/gocov
-  - go get github.com/modocache/gover
-  - go get github.com/mattn/goveralls
-  - go get golang.org/x/tools/cmd/cover
+- go get github.com/axw/gocov/gocov
+- go get github.com/modocache/gover
+- go get github.com/mattn/goveralls
+- go get golang.org/x/tools/cmd/cover
 script:
-  - go test -coverprofile=googledrive.coverprofile ./googledrive
-  - go test -coverprofile=main.coverprofile
-  - $HOME/gopath/bin/gover
-  - $HOME/gopath/bin/goveralls -coverprofile=gover.coverprofile \
-    -service=travis-ci
+- go test -coverprofile=googledrive.coverprofile ./googledrive
+- go test -coverprofile=main.coverprofile
+- $HOME/gopath/bin/gover
+- $HOME/gopath/bin/goveralls -coverprofile=gover.coverprofile \ -service=travis-ci
 notifications:
-  slack:
-    secure: $SLACK_TOKEN
   email: false
+  slack:
+    secure: Ka+PLZImBvpgsP16IsOvPUks3loLiQduieF16w1HmZKcBJiaYRXDAPK6ZK4C0TCpr/22R50KJpn8mycRvLHY7UBkihPBEG7bOdsbrCxSzciscr09HfH2koJZL/hrApl9E/RSDk0qKL2DM3+uFq8D8S683JTt+PTbSD9mVwcRkUITVF5unOVAqpTEoeKa9jVSxlBNKzJ6pfwPzXNmUh/6KL3JgIjs7VaKktRGwaFMZiQj4jgrfMTcRKGLKQwjXaqpsyc8FjiQT/fnrCL6XEpmZLd8MiGRcMWbZPwNF09/b20EjxUpw9sCeqGDqlwL8T4X/zg9Qmi2vyX00sA6WnLr2RmA2ak0TTF9PqNZyLle3oz38SaDHObq9c+Vuo+PiL4eFCoB05xPBntCG4d6Z457A8oewAOuyjBSIn1BUHpQ2BDZJ2S5f+xzfAI3ONjgDO4png/8FJ1GYy66dlRCHDt5uhtnrO4LeO6K3cBHwP8VqE89HzpTHelTcG55MzdtB3OGXaFgr9bZ6I7Y6T/MhMqF9f4ygEG+4y63+NbNdUwwsNJyA6PH9bkBOv8D0jEvCPtUXWjqzk4x4xBFdypqol9TexdPg7VncDa00HH/LTendnPL1UVCZ2jZixyoL+vc+tycCZYghG1lL6XR/1zIuyn90Ojz9cF9FWIYb4VkrzcBhXc=
