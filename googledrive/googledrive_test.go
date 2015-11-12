@@ -44,8 +44,8 @@ func TestAdd(t *testing.T) {
 	}
 
 	for _, test := range addTestTable {
-		err := g.Add(test.code, mockRC{bytes.NewBufferString("test")},
-			test.filepath)
+		err := g.Add(test.code, test.filepath,
+			mockRC{bytes.NewBufferString("test")})
 		if test.fail == (err == nil) {
 			t.Errorf("Error expected: %t. Got: %v", test.fail, err)
 		}
@@ -68,8 +68,12 @@ func TestBrowse(t *testing.T) {
 	}
 }
 
-func TestDelete(t *testing.T) {
-	if emptyG.Delete("", "") != nil {
+func TestRemove(t *testing.T) {
+	if emptyG.Remove("", "") == nil {
+		t.Error("You should not be able to remove the root folder")
+	}
+
+	if emptyG.Remove("", "test") != nil {
 		t.Error("Empty config should just fail silently")
 	}
 }

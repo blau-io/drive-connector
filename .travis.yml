@@ -8,9 +8,11 @@ before_install:
 - go get golang.org/x/tools/cmd/cover
 script:
 - go test -coverprofile=googledrive.coverprofile ./googledrive
+- go test -coverprofile=warehouse.coverprofile ./warehouse
 - go test -coverprofile=main.coverprofile
 - $HOME/gopath/bin/gover
-- $HOME/gopath/bin/goveralls -coverprofile=gover.coverprofile \ -service=travis-ci
+- $HOME/gopath/bin/goveralls -coverprofile=gover.coverprofile \
+  -service=travis-ci
 notifications:
   email: false
   slack:

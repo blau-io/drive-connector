@@ -19,8 +19,7 @@ type GoogleDrive struct {
 }
 
 // Add inserts a new file on Google Drive
-func (d *GoogleDrive) Add(code string, content io.ReadCloser,
-	filepath string) error {
+func (d *GoogleDrive) Add(code, filepath string, content io.ReadCloser) error {
 	if filepath == "" || filepath == "/" {
 		return errors.New("No filepath specified")
 	}
@@ -82,26 +81,6 @@ func (d *GoogleDrive) Browse(code, filepath string) ([]string, error) {
 	}
 
 	return out, nil
-}
-
-// Delete deletes a file from Google Drive
-func (d *GoogleDrive) Delete(code, filepath string) error {
-	client, _ := getClient(d.config, code)
-	if client == nil {
-		return nil
-	}
-
-	file, err := getFileByPath(client, filepath)
-	if err != nil {
-		return err
-	}
-
-	err = client.Files.Delete(file.Id).Do()
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 // NewGoogleDrive reads the information from the supplied secret file and
@@ -174,6 +153,30 @@ func (d *GoogleDrive) Read(code, filepath string) (*http.Response, error) {
 	}
 
 	return client.Files.Get(file.Id).Download()
+}
+
+// Remove deletes a file from Google Drive
+func (d *GoogleDrive) Remove(code, filepath string) error {
+	if filepath == "" || filepath == "/" {
+		return errors.New("Deleting the root folder is not permitted")
+	}
+
+	client, _ := getClient(d.config, code)
+	if client == nil {
+		return nil
+	}
+
+	file, err := getFileByPath(client, filepath)
+	if err != nil {
+		return err
+	}
+
+	err = client.Files.Delete(file.Id).Do()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // Validate validates an access code against the oauth2.config object. It

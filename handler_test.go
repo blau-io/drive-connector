@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/blau-io/warehouse-manager/warehouse"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -73,7 +74,7 @@ func TestAuthURL(t *testing.T) {
 		}
 
 		dec := json.NewDecoder(w.Body)
-		var v authURLJSON
+		var v warehouse.AuthURLJSON
 		if err := dec.Decode(&v); err != nil {
 			t.Errorf("Error while decoding json: %s", err.Error())
 			continue
@@ -124,7 +125,7 @@ func TestBrowse(t *testing.T) {
 		}
 
 		dec := json.NewDecoder(w.Body)
-		var b browseJSON
+		var b warehouse.BrowseJSON
 		if err := dec.Decode(&b); err != nil {
 			t.Errorf("Error while decoding json: %s", err.Error())
 		}
@@ -169,7 +170,7 @@ func TestPublish(t *testing.T) {
 		}
 
 		dec := json.NewDecoder(w.Body)
-		var v publishJSON
+		var v warehouse.PublishJSON
 		if err := dec.Decode(&v); err != nil {
 			t.Errorf("Error while decoding json: %s", err.Error())
 		}
@@ -277,7 +278,7 @@ func TestValidate(t *testing.T) {
 		}
 
 		dec := json.NewDecoder(w.Body)
-		var v validateJSON
+		var v warehouse.ValidateJSON
 		if err := dec.Decode(&v); err != nil {
 			t.Errorf("Error while decoding json: %s", err.Error())
 			continue

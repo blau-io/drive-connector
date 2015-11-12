@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/blau-io/warehouse-manager/googledrive"
+	"github.com/blau-io/warehouse-manager/warehouse"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -15,7 +15,7 @@ var (
 		GoogleSecretFile string
 		Port             int
 	}
-	gd *googledrive.GoogleDrive
+	wh *warehouse.Client
 )
 
 func init() {
@@ -25,11 +25,9 @@ func init() {
 	flag.Parse()
 
 	var err error
-	gd, err = googledrive.NewGoogleDrive(flags.GoogleSecretFile)
+	wh, err = warehouse.NewClient(flags.GoogleSecretFile)
 	if err != nil {
-		log.Printf("Error: %s\n", err.Error())
-		log.Println("Google Drive not configured, proceeding...")
-		gd = &googledrive.GoogleDrive{}
+		log.Printf("Error: %s. Proceeding...", err.Error())
 	}
 }
 
