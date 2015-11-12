@@ -23,7 +23,7 @@ func TestAuthURL(t *testing.T) {
 }
 
 func TestBrowse(t *testing.T) {
-	if _, err := c.Browse("", ""); err != nil {
+	if _, err := c.Browse("", "test"); err != nil {
 		t.Errorf("Error: %s", err.Error())
 	}
 }

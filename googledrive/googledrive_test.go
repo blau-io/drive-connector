@@ -40,7 +40,6 @@ func TestAdd(t *testing.T) {
 		{"", "", true},
 		//{"", "test", true},
 		{"token", "", true},
-		//{"token", "test", false},
 	}
 
 	for _, test := range addTestTable {
@@ -49,6 +48,10 @@ func TestAdd(t *testing.T) {
 		if test.fail == (err == nil) {
 			t.Errorf("Error expected: %t. Got: %v", test.fail, err)
 		}
+	}
+
+	if err := emptyG.Add("token", "test", nil); err != nil {
+		t.Errorf("Error: %s", err.Error())
 	}
 }
 

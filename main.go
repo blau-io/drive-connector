@@ -38,7 +38,7 @@ func main() {
 	router.GET("/auth/new/:provider", authURL)
 	router.POST("/auth/validate", validate)
 	router.GET("/browse/*filepath", browse)
-	router.GET("/publish/*filepath", publish)
+	router.POST("/publish/*filepath", publish)
 	router.GET("/read/*filepath", read)
 	router.DELETE("/remove/*filepath", remove)
 

@@ -98,7 +98,8 @@ func TestBrowse(t *testing.T) {
 		status int
 	}{
 		{"", "", http.StatusUnauthorized},
-		{"", "random", http.StatusOK},
+		{"", "random", http.StatusBadRequest},
+		{"test", "random", http.StatusOK},
 	}
 
 	for _, test := range browseTestTable {
@@ -134,7 +135,7 @@ func TestBrowse(t *testing.T) {
 
 func TestPublish(t *testing.T) {
 	router := httprouter.New()
-	router.GET("/publish/*filepath", publish)
+	router.POST("/publish/*filepath", publish)
 
 	var publishTestTable = []struct {
 		path   string
@@ -148,7 +149,7 @@ func TestPublish(t *testing.T) {
 
 	for _, test := range publishTestTable {
 		w := httptest.NewRecorder()
-		r, _ := http.NewRequest("GET", "http://x.co/publish/"+test.path, nil)
+		r, _ := http.NewRequest("POST", "http://x.co/publish/"+test.path, nil)
 
 		if test.token != "" {
 			r.AddCookie(&http.Cookie{Name: "token", Value: test.token})
@@ -217,7 +218,7 @@ func TestRemove(t *testing.T) {
 		status int
 	}{
 		{"", "", http.StatusUnauthorized},
-		//{"", "token", http.StatusBadRequest},
+		{"", "token", http.StatusBadRequest},
 		{"test", "", http.StatusUnauthorized},
 		{"test", "token", http.StatusOK},
 	}

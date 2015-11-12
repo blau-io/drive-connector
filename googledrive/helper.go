@@ -15,3 +15,7 @@ func getClient(config *oauth2.Config, code string) (*drive.Service, error) {
 	token := &oauth2.Token{AccessToken: code}
 	return drive.New(config.Client(context.Background(), token))
 }
+
+func isRoot(filepath string) bool {
+	return filepath == "" || filepath == "/"
+}

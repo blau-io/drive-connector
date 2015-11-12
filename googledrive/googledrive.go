@@ -20,7 +20,7 @@ type GoogleDrive struct {
 
 // Add inserts a new file on Google Drive
 func (d *GoogleDrive) Add(code, filepath string, content io.ReadCloser) error {
-	if filepath == "" || filepath == "/" {
+	if isRoot(filepath) {
 		return errors.New("No filepath specified")
 	}
 
@@ -59,6 +59,10 @@ func (d *GoogleDrive) AuthURL() string {
 
 // Browse return the content of a directory as a list
 func (d *GoogleDrive) Browse(code, filepath string) ([]string, error) {
+	if isRoot(filepath) {
+		return nil, errors.New("For added security, we won't show the root")
+	}
+
 	client, _ := getClient(d.config, code)
 	if client == nil {
 		return nil, nil
@@ -138,7 +142,7 @@ func (d *GoogleDrive) Publish(code, filepath string) (string, error) {
 
 // Read returns the content of a file
 func (d *GoogleDrive) Read(code, filepath string) (*http.Response, error) {
-	if filepath == "" || filepath == "/" {
+	if isRoot(filepath) {
 		return nil, errors.New("For the content of a folder, please use browse")
 	}
 

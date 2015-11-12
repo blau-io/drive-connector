@@ -28,7 +28,26 @@ func TestGetClient(t *testing.T) {
 	for _, test := range clientTable {
 		_, err := getClient(test.config, "test")
 		if test.fail == (err == nil) {
-			t.Errorf("Error expected: %t. Got: %v", test.fail, err)
+			t.Errorf("Error: expected %t, got %v", test.fail, err)
+		}
+	}
+}
+
+func TestIsRoot(t *testing.T) {
+	var isRootTable = []struct {
+		filepath string
+		result   bool
+	}{
+		{"", true},
+		{"/", true},
+		{"foo", false},
+	}
+
+	for _, test := range isRootTable {
+		result := isRoot(test.filepath)
+
+		if test.result != result {
+			t.Errorf("Error: expected %t, got %t", test.result, result)
 		}
 	}
 }
